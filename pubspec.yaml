@@ -1,0 +1,42 @@
+name: flutter_wyz
+description: A new Flutter application.
+
+version: 1.0.5+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  simple_permissions: 0.1.9
+  package_info: 0.3.2+1
+  path_provider: ^0.4.1
+  flutter_downloader: 1.0.5
+  open_file: 1.3.0
+  image_picker: 0.4.12
+  image_crop: ^0.2.0
+  shared_preferences: 0.4.0
+  flutter_image_compress: 0.4.0
+  cupertino_icons: ^0.1.2
+  http: ^0.12.0
+  barcode_scan: 0.0.5
+  cached_network_image: 0.5.1
+  exifdart: ^0.7.0+3
+  local_notifications: 0.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+  - img/start.jpg
+  - img/loading.gif
+  - img/p.jpg
+  - img/p.png
+  - img/pp.png
+  - img/add.png
+  - img/love.png
+  - img/chat.png
