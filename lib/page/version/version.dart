@@ -199,7 +199,7 @@ class _VersionState extends State<Version> with SingleTickerProviderStateMixin {
     return FadeTransition(
       opacity: _controller,
       child: Image.asset(
-        'img/start.jpg',
+        'img/back.png',
         fit: BoxFit.cover,
       ),
     );
