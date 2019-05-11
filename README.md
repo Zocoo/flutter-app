@@ -4,6 +4,8 @@ flutter 社交app Updated 3 minutes ago 主要用于研究flutter常用packages�
 
 ## Getting Started
 
+如果出现服务器数据返回慢，不要慌，毕竟后面是个1核1G1M带宽的服务器，体谅下～～
+
 安卓下载尝试请扫码<br> 
 ![安卓apk](https://assets-store-cdn.48lu.cn/assets-store/6f5a3202c72d3aeaecb667395432b842.png?x-oss-process=image/resize,m_lfit,h_800,w_800)  
 

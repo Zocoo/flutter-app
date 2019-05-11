@@ -1,6 +1,6 @@
 class Config {
-  String serverUrl = "https://co.xhznkz.com/api";
+  String serverUrl = "";
   String host = "http://ddz.so-what.cc";
-  int version = 5;
+  int version = 6;
 //  String host = "http://so-what.nat123.cc";
 }
