@@ -24,6 +24,8 @@ dependencies:
   cached_network_image: 0.5.1
   exifdart: ^0.7.0+3
   local_notifications: 0.0.3
+  flutter_sound: ^1.4.0
+  intl: ^0.15.6
 
 dev_dependencies:
   flutter_test:
@@ -41,3 +43,9 @@ flutter:
   - img/love.png
   - img/chat.png
   - img/back.png
+  - img/ic_mic.png
+  - img/ic_pause.png
+  - img/ic_play.png
+  - img/ic_stop.png
+  - img/ic_volume_down.png
+  - img/ic_volume_up.png

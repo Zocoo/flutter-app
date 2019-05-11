@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,10 @@ import 'package:flutter_wyz/util/local_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:exifdart/exifdart.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:intl/intl.dart' show DateFormat;
+import 'package:path_provider/path_provider.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class ChatHome extends StatefulWidget {
   ChatHome({Key key, this.id, this.name}) : super(key: key);
@@ -31,6 +37,21 @@ class _ChatHomeState extends State<ChatHome> {
     _ctXlGx();
   }
 
+  @override
+  void dispose() {
+    try {
+      if (null != _ctXl1) _ctXl1.cancel();
+    } catch (e) {}
+    try {
+      if (null != _ctXl) _ctXl.cancel();
+    } catch (e) {}
+    try {
+      if (null != _ctinit) _ctinit.cancel();
+    } catch (e) {}
+    super.dispose();
+  }
+
+  FlutterSound flutterSound = new FlutterSound();
   bool _f = true;
   String _myHeadUrl = null;
   String _fHeadUrl = null;
@@ -48,7 +69,8 @@ class _ChatHomeState extends State<ChatHome> {
   bool _tb = true;
   Timer _ctinit;
   Timer _ctXl;
-  bool _xztp = false;
+  Timer _ctXl1;
+  int _xztp = 2;
   List<String> _mrPic = [];
 
   _initPic() async {
@@ -165,6 +187,22 @@ class _ChatHomeState extends State<ChatHome> {
     });
   }
 
+  _luying() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: Text(''),
+          content: SingleChildScrollView(
+            child: Text('录音中'),
+          ),
+          actions: <Widget>[],
+        );
+      },
+    );
+  }
+
   _initChatData(int type, double hh) async {
     String url = Config().host +
         "/chat/history?&token=" +
@@ -242,9 +280,6 @@ class _ChatHomeState extends State<ChatHome> {
         var image_base64 = base64.encode(image.readAsBytesSync());
         uploadPic(image_base64);
       }
-//    testCompressFile(image);
-//    var image_base64 = base64.encode(image.readAsBytesSync());
-//    uploadPic(image_base64);
     }
   }
 
@@ -332,6 +367,25 @@ class _ChatHomeState extends State<ChatHome> {
     }
   }
 
+  _sendTextVoid(String dataxx) async {
+    _msgController.text = "";
+    String url = Config().host + "/chat?&token=" + _token;
+    String datax = json.encode(
+        {'content': dataxx, 'userId': _userId, 'friendId': _id, 'type': 3});
+    final http.Response response = await http.post(url, body: datax);
+    Utf8Decoder utf8decoder = new Utf8Decoder();
+    Map data = json.decode(utf8decoder.convert(response.bodyBytes));
+    print(data);
+    var result = data['code'];
+    if (result == 0) {
+      setState(() {
+        _getNewChatData(1);
+      });
+    } else {
+      Toast.toast(context, data['msg']);
+    }
+  }
+
   _initMyHeadImg() async {
     String url = Config().host + "/user?id=" + _userId + "&token=" + _token;
     final http.Response response = await http.get(url);
@@ -381,11 +435,26 @@ class _ChatHomeState extends State<ChatHome> {
                   onPressed: () {
 //                    getImage();
                     setState(() {
-                      _xztp = true;
+                      _xztp = 1;
                       FocusScope.of(context).requestFocus(FocusNode());
                     });
                   },
                   child: Icon(Icons.image),
+                ),
+              ),
+              Container(
+//                width: 50,
+                padding: EdgeInsets.only(right: 1),
+                child: MaterialButton(
+                  minWidth: 10,
+                  onPressed: () {
+//                    getImage();
+                    setState(() {
+                      _xztp = 3;
+                      FocusScope.of(context).requestFocus(FocusNode());
+                    });
+                  },
+                  child: Icon(Icons.keyboard_voice),
                 ),
               ),
 //              Container(
@@ -415,7 +484,7 @@ class _ChatHomeState extends State<ChatHome> {
                       _maxN = 0;
                       _minM = 0;
                       setState(() {
-                        _xztp = false;
+                        _xztp = 2;
                       });
                     },
                     decoration: InputDecoration(
@@ -440,7 +509,7 @@ class _ChatHomeState extends State<ChatHome> {
           ),
         ),
         Offstage(
-          offstage: !_xztp,
+          offstage: 1 != _xztp,
           child: Container(
             padding: EdgeInsets.only(bottom: 20, left: 15, right: 15),
             height: 140,
@@ -451,6 +520,181 @@ class _ChatHomeState extends State<ChatHome> {
                 itemBuilder: (context, index) {
                   return _onePic(index);
                 }),
+//            color: Colors.red,
+          ),
+        ),
+        Offstage(
+          offstage: 3 != _xztp,
+          child: Container(
+            padding: EdgeInsets.only(bottom: 20, left: 15, right: 15),
+            height: 140,
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                  onLongPressDragUp: (r) {
+                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+;                    this.stopRecorder();
+//                    Navigator.pop(context);
+//                    if (_ctXl1 != null) _ctXl1.cancel();
+                  },
+                  onLongPressDragStart: (r) {
+                    this.startRecorder();
+//                    _luying();
+//                    _ctXl1 = Timer.periodic(
+//                        new Duration(milliseconds: 100), (timer) {});
+                  },
+                  child: Container(
+                      height: 50,
+                      width: 200,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(6))),
+                      child: Center(
+                        child: Text(
+                          '按住说话',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      )),
+                ),
+              ],
+            ),
+//                ListView(
+//              children: <Widget>[
+//                Column(
+//                  crossAxisAlignment: CrossAxisAlignment.center,
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  children: <Widget>[
+//                    Container(
+//                      margin: EdgeInsets.only(top: 24.0, bottom: 16.0),
+//                      child: Text(
+//                        this._recorderTxt,
+//                        style: TextStyle(
+//                          fontSize: 48.0,
+//                          color: Colors.black,
+//                        ),
+//                      ),
+//                    ),
+//                    _isRecording
+//                        ? LinearProgressIndicator(
+//                            value: 100.0 / 160.0 * (this._dbLevel ?? 1) / 100,
+//                            valueColor:
+//                                AlwaysStoppedAnimation<Color>(Colors.green),
+//                            backgroundColor: Colors.red,
+//                          )
+//                        : Container()
+//                  ],
+//                ),
+//                Row(
+//                  children: <Widget>[
+//                    Container(
+//                      width: 56.0,
+//                      height: 56.0,
+//                      child: ClipOval(
+//                        child: FlatButton(
+//                          onPressed: () {
+//                            if (!this._isRecording) {
+//                              return this.startRecorder();
+//                            }
+//                            this.stopRecorder();
+//                          },
+//                          padding: EdgeInsets.all(8.0),
+//                          child: Image(
+//                            image: this._isRecording
+//                                ? AssetImage('img/ic_stop.png')
+//                                : AssetImage('img/ic_mic.png'),
+//                          ),
+//                        ),
+//                      ),
+//                    ),
+//                  ],
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  crossAxisAlignment: CrossAxisAlignment.center,
+//                ),
+//                Column(
+//                  crossAxisAlignment: CrossAxisAlignment.center,
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  children: <Widget>[
+//                    Container(
+//                      margin: EdgeInsets.only(top: 60.0, bottom: 16.0),
+//                      child: Text(
+//                        this._playerTxt,
+//                        style: TextStyle(
+//                          fontSize: 48.0,
+//                          color: Colors.black,
+//                        ),
+//                      ),
+//                    ),
+//                  ],
+//                ),
+//                Row(
+//                  children: <Widget>[
+//                    Container(
+//                      width: 56.0,
+//                      height: 56.0,
+//                      child: ClipOval(
+//                        child: FlatButton(
+//                          onPressed: () {
+//                            startPlayer('');
+//                          },
+//                          padding: EdgeInsets.all(8.0),
+//                          child: Image(
+//                            image: AssetImage('img/ic_play.png'),
+//                          ),
+//                        ),
+//                      ),
+//                    ),
+//                    Container(
+//                      width: 56.0,
+//                      height: 56.0,
+//                      child: ClipOval(
+//                        child: FlatButton(
+//                          onPressed: () {
+//                            pausePlayer();
+//                          },
+//                          padding: EdgeInsets.all(8.0),
+//                          child: Image(
+//                            width: 36.0,
+//                            height: 36.0,
+//                            image: AssetImage('img/ic_pause.png'),
+//                          ),
+//                        ),
+//                      ),
+//                    ),
+//                    Container(
+//                      width: 56.0,
+//                      height: 56.0,
+//                      child: ClipOval(
+//                        child: FlatButton(
+//                          onPressed: () {
+//                            stopPlayer();
+//                          },
+//                          padding: EdgeInsets.all(8.0),
+//                          child: Image(
+//                            width: 28.0,
+//                            height: 28.0,
+//                            image: AssetImage('img/ic_stop.png'),
+//                          ),
+//                        ),
+//                      ),
+//                    ),
+//                  ],
+//                  mainAxisAlignment: MainAxisAlignment.center,
+//                  crossAxisAlignment: CrossAxisAlignment.center,
+//                ),
+//                Container(
+//                    height: 56.0,
+//                    child: Slider(
+//                        value: slider_current_position,
+//                        min: 0.0,
+//                        max: max_duration,
+//                        onChanged: (double value) async {
+//                          await flutterSound.seekToPlayer(value.toInt());
+//                        },
+//                        divisions: max_duration.toInt()))
+//              ],
+//            ),
 //            color: Colors.red,
           ),
         ),
@@ -471,8 +715,9 @@ class _ChatHomeState extends State<ChatHome> {
         child: Container(
           height: 100,
           padding: EdgeInsets.only(left: 5),
-          child: CachedNetworkImage(imageUrl: _mrPic[index] +
-              "?x-oss-process=image/resize,m_lfit,h_200,w_200"),
+          child: CachedNetworkImage(
+              imageUrl: _mrPic[index] +
+                  "?x-oss-process=image/resize,m_lfit,h_200,w_200"),
         ));
   }
 
@@ -548,7 +793,7 @@ class _ChatHomeState extends State<ChatHome> {
             ),
           ),
         );
-      } else {
+      } else if (_list[index].type == 2) {
         // 收到的图片消息
         return Offstage(
           offstage: _xs,
@@ -602,6 +847,79 @@ class _ChatHomeState extends State<ChatHome> {
                   ),
                 ),
               ],
+            ),
+          ),
+        );
+      } else {
+        return Offstage(
+          offstage: _xs,
+          child: GestureDetector(
+            onTap: () {
+              startPlayer(_list[index].content);
+            },
+            child: Container(
+              padding: EdgeInsets.all(10),
+//          color: Colors.red,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    height: 40,
+                    width: 40,
+                    child: new ClipRRect(
+                      borderRadius: BorderRadius.circular(6.0),
+                      child: CachedNetworkImage(
+                          imageUrl: _fHeadUrl == null
+                              ? 'https://assets-store-cdn.48lu.cn/assets-store/5002cfc3bf41f67f51b1d979ca2bd637.png' +
+                                  "?x-oss-process=image/resize,m_lfit,h_100,w_100"
+                              : _fHeadUrl +
+                                  "?x-oss-process=image/resize,m_lfit,h_100,w_100"),
+                    ),
+                  ),
+                  Flexible(
+                      child: Container(
+                    padding: EdgeInsets.only(left: 10, right: 80),
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          left: 10, top: 10, bottom: 3, right: 10),
+//                      height:1,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(6))),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.only(bottom: 7),
+                            child: Text(
+                              '点击播放...',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color.fromARGB(255, 240, 240, 240),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            child: Text(
+                              DateTime.fromMicrosecondsSinceEpoch(
+                                      _list[index].createAt * 1000 * 1000)
+                                  .toString()
+                                  .substring(0, 19),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color.fromARGB(255, 200, 200, 200)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
+                ],
+              ),
             ),
           ),
         );
@@ -677,7 +995,7 @@ class _ChatHomeState extends State<ChatHome> {
             ),
           ),
         );
-      } else {
+      } else if (_list[index].type == 2) {
         return Offstage(
           offstage: _xs,
           child: Container(
@@ -730,6 +1048,79 @@ class _ChatHomeState extends State<ChatHome> {
                   ),
                 ),
               ],
+            ),
+          ),
+        );
+      } else {
+        return Offstage(
+          offstage: _xs,
+          child: GestureDetector(
+            onTap: () {
+              startPlayer(_list[index].content);
+            },
+            child: Container(
+              padding: EdgeInsets.all(10),
+//          color: Colors.red,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Flexible(
+                    child: Container(
+                      padding: EdgeInsets.only(right: 10, left: 80),
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            left: 10, top: 10, bottom: 10, right: 10),
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.all(Radius.circular(6))),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.only(bottom: 7),
+                              child: Text(
+                                '点击播放...',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Color.fromARGB(255, 240, 240, 240),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              child: Text(
+                                DateTime.fromMicrosecondsSinceEpoch(
+                                        _list[index].createAt * 1000 * 1000)
+                                    .toString()
+                                    .substring(0, 19),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color.fromARGB(255, 200, 200, 200)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 40,
+                    width: 40,
+                    child: new ClipRRect(
+                      borderRadius: BorderRadius.circular(6.0),
+                      child: CachedNetworkImage(
+                          imageUrl: _myHeadUrl == null
+                              ? 'https://assets-store-cdn.48lu.cn/assets-store/5002cfc3bf41f67f51b1d979ca2bd637.png' +
+                                  "?x-oss-process=image/resize,m_lfit,h_100,w_100"
+                              : _myHeadUrl +
+                                  "?x-oss-process=image/resize,m_lfit,h_100,w_100"),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -809,5 +1200,376 @@ class _ChatHomeState extends State<ChatHome> {
         return new Future.value(false);
       },
     );
+  }
+
+  void startRecorder() async {bool res = await SimplePermissions.checkPermission(
+      Permission.WriteExternalStorage);
+  print(res);
+  if (!res) {
+    await SimplePermissions.requestPermission(
+        Permission.WriteExternalStorage);
+  }
+  if (res) {
+    try {
+      String path = await flutterSound.startRecorder(null);
+      print('startRecorder: $path');
+      _path = path;
+      _recorderSubscription = flutterSound.onRecorderStateChanged.listen((e) {
+//        DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+//            e.currentPosition.toInt(),
+//            isUtc: true);
+//        String txt = DateFormat('mm:ss:SS', 'en_GB').format(date);
+//
+//
+
+        String d = DateTime.fromMicrosecondsSinceEpoch(
+                DateTime.now().millisecondsSinceEpoch * 1000)
+            .toString()
+            .substring(0, 19);
+        this.setState(() {
+          this._recorderTxt = d;
+        });
+      });
+      _dbPeakSubscription =
+          flutterSound.onRecorderDbPeakChanged.listen((value) {
+        print("got update -> $value");
+        setState(() {
+          this._dbLevel = value;
+        });
+      });
+
+      this.setState(() {
+        this._isRecording = true;
+      });
+    } catch (err) {
+      print('startRecorder error: $err');
+    }
+  }}
+
+  String _path = '';
+
+  void stopRecorder() async {
+    try {
+      String result = await flutterSound.stopRecorder();
+      print('stopRecorder: $result');
+      if (_recorderSubscription != null) {
+        _recorderSubscription.cancel();
+        _recorderSubscription = null;
+      }
+      if (_dbPeakSubscription != null) {
+        _dbPeakSubscription.cancel();
+        _dbPeakSubscription = null;
+      }
+      print("xxxxxxxxxx1111111111111" + result);
+      File v = new File(_path);
+      print(v.readAsBytesSync());
+      String s = base64.encode(v.readAsBytesSync());
+
+      print(s);
+      await _sendTextVoid(s);
+//      List<int> a = base64.decode(s);
+//      print(a);
+//      ff.writeAsBytesSync(a);
+//      print(ff.readAsBytesSync());
+//      _uf();
+      this.setState(() {
+        this._isRecording = false;
+      });
+    } catch (err) {
+      print('stopRecorder error: $err');
+    }
+  }
+
+  _uf() async {
+    String field = "picture-upload";
+    List<int> bytes = new File(_path).readAsBytesSync();
+    var boundary = _boundaryString();
+    String contentType = 'multipart/form-data; boundary=$boundary';
+    Map headers =
+        _makeHttpHeaders(contentType, "*/*", ''); //, "XMLHttpRequest");
+    String file_contentType;
+    // 构造文件字段数据
+    String data = '--$boundary\r\nContent-Disposition: form-data; name="$field"; ' +
+        'filename="default.m4a"\r\nContent-Type: ' +
+        '${(file_contentType == null) ? getMediaType('.m4a') : file_contentType}\r\n\r\n';
+    var controller = new StreamController<List<int>>(sync: true);
+    controller.add(data.codeUnits);
+    controller.add(bytes);
+    controller.add("\r\n--$boundary--\r\n".codeUnits);
+    controller.close();
+
+//    bytes =  controller.stream;
+
+    http.MultipartFile.fromPath('default.m4a', _path);
+    String url = Config().host + "/chat?&token=" + _token;
+    final http.Response response = await http.post(
+        'https://so-what.cc/file/upload',
+        headers: headers,
+        body: controller.stream);
+    Utf8Decoder utf8decoder = new Utf8Decoder();
+    Map data1 = json.decode(utf8decoder.convert(response.bodyBytes));
+    print(data1);
+    var result = data1['code'];
+    if (result == 0) {
+      setState(() {
+        _getNewChatData(1);
+      });
+    } else {
+      Toast.toast(context, data1['msg']);
+    }
+  }
+
+  void startPlayer(String data) async {
+//    if (_isPlaying) {
+//      stopPlayer();
+//      return;
+//    }
+    bool res = await SimplePermissions.checkPermission(
+        Permission.WriteExternalStorage);
+    print(res);
+    if (!res) {
+      await SimplePermissions.requestPermission(
+          Permission.WriteExternalStorage);
+    }
+    if (res) {
+      List<int> a = base64.decode(data);
+      var directory = await getExternalStorageDirectory();
+      File ff = new File(directory.path + "/bofang.m4a");
+      ff.writeAsBytesSync(a);
+      String path = await flutterSound.startPlayer(ff.path);
+      await flutterSound.setVolume(1.0);
+      print('startPlayer: $path');
+
+      try {
+        _playerSubscription = flutterSound.onPlayerStateChanged.listen((e) {
+          if (e != null) {
+            slider_current_position = e.currentPosition;
+            max_duration = e.duration;
+
+            String d = DateTime.fromMicrosecondsSinceEpoch(
+                DateTime
+                    .now()
+                    .millisecondsSinceEpoch * 1000)
+                .toString()
+                .substring(0, 19);
+            this.setState(() {
+              this._isPlaying = true;
+              this._playerTxt = d;
+            });
+          }
+        });
+      } catch (err) {
+        print('error: $err');
+      }
+    }
+  }
+  void stopPlayer() async {
+    try {
+      String result = await flutterSound.stopPlayer();
+      print('stopPlayer: $result');
+      if (_playerSubscription != null) {
+        _playerSubscription.cancel();
+        _playerSubscription = null;
+      }
+
+      this.setState(() {
+        this._isPlaying = false;
+      });
+    } catch (err) {
+      print('error: $err');
+    }
+  }
+
+  void pausePlayer() async {
+    String result = await flutterSound.pausePlayer();
+    print('pausePlayer: $result');
+  }
+
+  void resumePlayer() async {
+    String result = await flutterSound.resumePlayer();
+    print('resumePlayer: $result');
+  }
+
+  void seekToPlayer(int milliSecs) async {
+    String result = await flutterSound.seekToPlayer(milliSecs);
+    print('seekToPlayer: $result');
+  }
+
+  bool _isRecording = false;
+  bool _isPlaying = false;
+  StreamSubscription _recorderSubscription;
+  StreamSubscription _dbPeakSubscription;
+  StreamSubscription _playerSubscription;
+
+  String _recorderTxt = '00:00:00';
+  String _playerTxt = '00:00:00';
+  double _dbLevel;
+
+  double slider_current_position = 0.0;
+  double max_duration = 1.0;
+
+  static String _boundaryString() {
+    var prefix = "---DartFormBoundary";
+    var list = new List<int>.generate(
+        _BOUNDARY_LENGTH - prefix.length,
+        (index) =>
+            _BOUNDARY_CHARACTERS[_random.nextInt(_BOUNDARY_CHARACTERS.length)],
+        growable: false);
+    return "$prefix${new String.fromCharCodes(list)}";
+  }
+
+  static String randomStr(
+      [int len = 8, List<int> chars = _BOUNDARY_CHARACTERS]) {
+    var list = new List<int>.generate(
+        len, (index) => chars[_random.nextInt(chars.length)],
+        growable: false);
+    return new String.fromCharCodes(list);
+  }
+
+  static const List<int> _BOUNDARY_CHARACTERS = const <int>[
+    0x30,
+    0x31,
+    0x32,
+    0x33,
+    0x34,
+    0x35,
+    0x36,
+    0x37,
+    0x38,
+    0x39,
+    0x61,
+    0x62,
+    0x63,
+    0x64,
+    0x65,
+    0x66,
+    0x67,
+    0x68,
+    0x69,
+    0x6A,
+    0x6B,
+    0x6C,
+    0x6D,
+    0x6E,
+    0x6F,
+    0x70,
+    0x71,
+    0x72,
+    0x73,
+    0x74,
+    0x75,
+    0x76,
+    0x77,
+    0x78,
+    0x79,
+    0x7A,
+    0x41,
+    0x42,
+    0x43,
+    0x44,
+    0x45,
+    0x46,
+    0x47,
+    0x48,
+    0x49,
+    0x4A,
+    0x4B,
+    0x4C,
+    0x4D,
+    0x4E,
+    0x4F,
+    0x50,
+    0x51,
+    0x52,
+    0x53,
+    0x54,
+    0x55,
+    0x56,
+    0x57,
+    0x58,
+    0x59,
+    0x5A
+  ];
+  static const int _BOUNDARY_LENGTH = 48;
+  static final Random _random = new Random();
+
+  static Map _makeHttpHeaders(
+      [String contentType,
+      String accept,
+      String token,
+      String XRequestWith,
+      String XMethodOverride]) {
+    Map headers = new Map<String, String>();
+    int i = 0;
+
+    if (contentType != null && contentType.length > 0) {
+      i++;
+      headers["Content-Type"] = contentType;
+    }
+
+    if (accept != null && accept.length > 0) {
+      i++;
+      headers["Accept"] = accept;
+    }
+
+    if (token != null && token.length > 0) {
+      i++;
+      headers["Authorization"] = "bearer " + token;
+    }
+
+    if (XRequestWith != null && XRequestWith.length > 0) {
+      i++;
+      headers["X-Requested-With"] = XRequestWith;
+    }
+
+    if (XMethodOverride != null && XMethodOverride.length > 0) {
+      i++;
+      headers["X-HTTP-Method-Override"] = XMethodOverride;
+    }
+
+    if (i == 0) return null;
+    // print(headers.toString());
+    return headers;
+  }
+
+  static MediaType getMediaType(final String fileExt) {
+    switch (fileExt) {
+      case ".jpg":
+      case ".jpeg":
+      case ".jpe":
+        return new MediaType("image", "jpeg");
+      case ".png":
+        return new MediaType("image", "png");
+      case ".bmp":
+        return new MediaType("image", "bmp");
+      case ".gif":
+        return new MediaType("image", "gif");
+      case ".json":
+        return new MediaType("application", "json");
+      case ".svg":
+      case ".svgz":
+        return new MediaType("image", "svg+xml");
+      case ".mp3":
+        return new MediaType("audio", "mpeg");
+      case ".m4a":
+        return new MediaType("audio", "mpeg");
+      case ".mp4":
+        return new MediaType("video", "mp4");
+      case ".htm":
+      case ".html":
+        return new MediaType("text", "html");
+      case ".css":
+        return new MediaType("text", "css");
+      case ".csv":
+        return new MediaType("text", "csv");
+      case ".txt":
+      case ".text":
+      case ".conf":
+      case ".def":
+      case ".log":
+      case ".in":
+        return new MediaType("text", "plain");
+    }
+    return null;
   }
 }

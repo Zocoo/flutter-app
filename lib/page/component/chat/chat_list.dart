@@ -72,6 +72,9 @@ class _ChatListState extends State<ChatList> {
     if (_list[index].type == 2) {
       content = '图片';
     }
+    if (_list[index].type == 3) {
+      content = '语音';
+    }
     String url = _list[index].userHeadUrl;
     if (_id == _list[index].friendId) {
       url = _list[index].myHeadUrl;
@@ -177,23 +180,23 @@ class _ChatListState extends State<ChatList> {
 
   @override
   Widget build(BuildContext context) {
-    return  (_list == null || _list.length < 1)
-          ? Container(
-              child: Center(
-                child: Text("暂无数据"),
+    return (_list == null || _list.length < 1)
+        ? Container(
+            child: Center(
+              child: Text("暂无数据"),
+            ),
+          )
+        : Container(
+            child: RefreshIndicator(
+              child: ListView.builder(
+                itemCount: _list.length,
+                itemBuilder: (context, index) {
+                  return _displayOne(index);
+                },
               ),
-            )
-          : Container(
-              child: RefreshIndicator(
-                child: ListView.builder(
-                  itemCount: _list.length,
-                  itemBuilder: (context, index) {
-                    return _displayOne(index);
-                  },
-                ),
-                onRefresh: _flush,
-              ),
-            );
+              onRefresh: _flush,
+            ),
+          );
   }
 
   @override
