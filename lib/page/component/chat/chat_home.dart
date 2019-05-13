@@ -14,7 +14,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:exifdart/exifdart.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:intl/intl.dart' show DateFormat;
+
+//import 'package:intl/intl.dart' show DateFormat;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
@@ -35,6 +36,7 @@ class _ChatHomeState extends State<ChatHome> {
     _init();
     _initDhk();
     _ctXlGx();
+//    _ctXlGxx();
   }
 
   @override
@@ -47,6 +49,9 @@ class _ChatHomeState extends State<ChatHome> {
     } catch (e) {}
     try {
       if (null != _ctinit) _ctinit.cancel();
+    } catch (e) {}
+    try {
+      if (null != _ctXl2) _ctXl2.cancel();
     } catch (e) {}
     super.dispose();
   }
@@ -69,9 +74,29 @@ class _ChatHomeState extends State<ChatHome> {
   bool _tb = true;
   Timer _ctinit;
   Timer _ctXl;
+  Timer _ctXl2;
   Timer _ctXl1;
   int _xztp = 2;
   List<String> _mrPic = [];
+
+  _ctXlGxx() {
+    _bofangStr = '.';
+    _ctXl2 = Timer.periodic(new Duration(milliseconds: 500), (timer) {
+      if (_bofangStr == '.') {
+        _bofangStr = '..';
+      } else if (_bofangStr == '..') {
+        _bofangStr = '...';
+      } else if (_bofangStr == '...') {
+        _bofangStr = '....';
+      } else if (_bofangStr == '....') {
+        _bofangStr = '.....';
+      } else if (_bofangStr == '.....') {
+        _bofangStr = '......';
+      } else if (_bofangStr == '......') {
+        _bofangStr = '.';
+      }
+    });
+  }
 
   _initPic() async {
     String url =
@@ -193,11 +218,40 @@ class _ChatHomeState extends State<ChatHome> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return new AlertDialog(
-          title: Text(''),
+          title: Text('语音'),
           content: SingleChildScrollView(
-            child: Text('录音中'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('语音录制完毕！'),
+                IconButton(
+                  onPressed: () {
+                    startPlayer(dataxx);
+                  },
+                  icon: Icon(Icons.play_circle_outline),
+                ),
+              ],
+            ),
           ),
-          actions: <Widget>[],
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                FlatButton(
+                  child: Text('发送'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _sendTextVoid(dataxx);
+                  },
+                ),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -368,21 +422,29 @@ class _ChatHomeState extends State<ChatHome> {
   }
 
   _sendTextVoid(String dataxx) async {
-    _msgController.text = "";
-    String url = Config().host + "/chat?&token=" + _token;
-    String datax = json.encode(
-        {'content': dataxx, 'userId': _userId, 'friendId': _id, 'type': 3});
-    final http.Response response = await http.post(url, body: datax);
-    Utf8Decoder utf8decoder = new Utf8Decoder();
-    Map data = json.decode(utf8decoder.convert(response.bodyBytes));
-    print(data);
-    var result = data['code'];
-    if (result == 0) {
-      setState(() {
-        _getNewChatData(1);
+    if ((_endTime - _startTime) > 1000) {
+      _msgController.text = "";
+      String url = Config().host + "/chat?&token=" + _token;
+      String datax = json.encode({
+        'content': dataxx + "-" + (_endTime - _startTime).toString(),
+        'userId': _userId,
+        'friendId': _id,
+        'type': 3
       });
+      final http.Response response = await http.post(url, body: datax);
+      Utf8Decoder utf8decoder = new Utf8Decoder();
+      Map data = json.decode(utf8decoder.convert(response.bodyBytes));
+      print(data);
+      var result = data['code'];
+      if (result == 0) {
+        setState(() {
+          _getNewChatData(1);
+        });
+      } else {
+        Toast.toast(context, data['msg']);
+      }
     } else {
-      Toast.toast(context, data['msg']);
+      Toast.toast(context, '语音时间太短！');
     }
   }
 
@@ -417,6 +479,12 @@ class _ChatHomeState extends State<ChatHome> {
       Toast.toast(context, data['msg']);
     }
   }
+
+  bool _luyining = false;
+
+  int _startTime = 0;
+
+  int _endTime = 0;
 
   Widget _input() {
     return Column(
@@ -526,7 +594,7 @@ class _ChatHomeState extends State<ChatHome> {
         Offstage(
           offstage: 3 != _xztp,
           child: Container(
-            padding: EdgeInsets.only(bottom: 20, left: 15, right: 15),
+            padding: EdgeInsets.only(bottom: 0, left: 0, right: 0),
             height: 140,
             width: double.infinity,
             child: Column(
@@ -534,29 +602,37 @@ class _ChatHomeState extends State<ChatHome> {
               children: <Widget>[
                 GestureDetector(
                   onLongPressDragUp: (r) {
-                    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-;                    this.stopRecorder();
+                    _endTime = DateTime.now().millisecondsSinceEpoch;
+                    print(_endTime);
+                    print(_endTime - _startTime);
+                    this.stopRecorder();
+                    setState(() {
+                      _luyining = false;
+                    });
 //                    Navigator.pop(context);
 //                    if (_ctXl1 != null) _ctXl1.cancel();
                   },
                   onLongPressDragStart: (r) {
+                    _startTime = DateTime.now().millisecondsSinceEpoch;
+                    print(_startTime);
                     this.startRecorder();
+                    setState(() {
+                      _luyining = true;
+                    });
 //                    _luying();
 //                    _ctXl1 = Timer.periodic(
 //                        new Duration(milliseconds: 100), (timer) {});
                   },
                   child: Container(
-                      height: 50,
-                      width: 200,
-                      decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.all(Radius.circular(6))),
-                      child: Center(
-                        child: Text(
-                          '按住说话',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      )),
+                    height: 140,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(
+                              _luyining ? "img/luyin.gif" : "img/luyin.png"),
+                          fit: BoxFit.cover),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -721,6 +797,9 @@ class _ChatHomeState extends State<ChatHome> {
         ));
   }
 
+  int _bofangId = 0;
+  String _bofangStr = '....';
+
   Widget _chatList(index) {
     if (_list[index].userId == _id) {
       // 收到的消息
@@ -795,6 +874,7 @@ class _ChatHomeState extends State<ChatHome> {
         );
       } else if (_list[index].type == 2) {
         // 收到的图片消息
+        print("xx");
         return Offstage(
           offstage: _xs,
           child: Container(
@@ -851,11 +931,25 @@ class _ChatHomeState extends State<ChatHome> {
           ),
         );
       } else {
+        print("xxx");
+        String t = _list[index].content.split('-')[1];
+        t = t.substring(0, t.length - 3);
+//        print(t);
         return Offstage(
           offstage: _xs,
           child: GestureDetector(
             onTap: () {
-              startPlayer(_list[index].content);
+              print(_bofangId);
+              if (_bofangId == 0) {
+                _bofangId = int.parse(_list[index].id);
+                startPlayer(_list[index].content.split("-")[0]);
+              } else if (_bofangId.toString() == _list[index].id)
+                stopPlayer();
+              else {
+                stopPlayer();
+                _bofangId = int.parse(_list[index].id);
+                startPlayer(_list[index].content.split("-")[0]);
+              }
             },
             child: Container(
               padding: EdgeInsets.all(10),
@@ -892,13 +986,42 @@ class _ChatHomeState extends State<ChatHome> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Container(
+                            width: 100,
                             padding: EdgeInsets.only(bottom: 7),
-                            child: Text(
-                              '点击播放...',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Color.fromARGB(255, 240, 240, 240),
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  height: 20,
+                                  width: 20,
+                                  child: Image.asset(
+                                    'img/yyl.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    t,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 240, 240, 240),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    _bofangId.toString() == _list[index].id
+                                        ? _bofangStr
+                                        : '',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Color.fromARGB(255, 240, 240, 240),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Container(
@@ -1052,13 +1175,26 @@ class _ChatHomeState extends State<ChatHome> {
           ),
         );
       } else {
+        String t = _list[index].content.split('-')[1];
+        t = t.substring(0, t.length - 3);
+//        print(t);
         return Offstage(
           offstage: _xs,
           child: GestureDetector(
             onTap: () {
-              startPlayer(_list[index].content);
+              if (_bofangId == 0) {
+                _bofangId = int.parse(_list[index].id);
+                startPlayer(_list[index].content.split("-")[0]);
+              } else if (_bofangId.toString() == _list[index].id)
+                stopPlayer();
+              else {
+                stopPlayer();
+                _bofangId = int.parse(_list[index].id);
+                startPlayer(_list[index].content.split("-")[0]);
+              }
             },
             child: Container(
+              width: 100,
               padding: EdgeInsets.all(10),
 //          color: Colors.red,
               child: Row(
@@ -1079,13 +1215,44 @@ class _ChatHomeState extends State<ChatHome> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
                             Container(
+                              width: 100,
                               padding: EdgeInsets.only(bottom: 7),
-                              child: Text(
-                                '点击播放...',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Color.fromARGB(255, 240, 240, 240),
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: <Widget>[
+                                  Container(
+                                    padding: EdgeInsets.only(right: 10),
+                                    child: Text(
+                                      _bofangId.toString() == _list[index].id
+                                          ? _bofangStr
+                                          : '',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color:
+                                            Color.fromARGB(255, 240, 240, 240),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(right: 10),
+                                    child: Text(
+                                      t,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color:
+                                            Color.fromARGB(255, 240, 240, 240),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 20,
+                                    width: 20,
+                                    child: Image.asset(
+                                      'img/yyr.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             Container(
@@ -1202,19 +1369,20 @@ class _ChatHomeState extends State<ChatHome> {
     );
   }
 
-  void startRecorder() async {bool res = await SimplePermissions.checkPermission(
-      Permission.WriteExternalStorage);
-  print(res);
-  if (!res) {
-    await SimplePermissions.requestPermission(
+  void startRecorder() async {
+    bool res = await SimplePermissions.checkPermission(
         Permission.WriteExternalStorage);
-  }
-  if (res) {
-    try {
-      String path = await flutterSound.startRecorder(null);
-      print('startRecorder: $path');
-      _path = path;
-      _recorderSubscription = flutterSound.onRecorderStateChanged.listen((e) {
+    print(res);
+    if (!res) {
+      await SimplePermissions.requestPermission(
+          Permission.WriteExternalStorage);
+    }
+    if (res) {
+      try {
+        String path = await flutterSound.startRecorder(null);
+        print('startRecorder: $path');
+        _path = path;
+        _recorderSubscription = flutterSound.onRecorderStateChanged.listen((e) {
 //        DateTime date = new DateTime.fromMillisecondsSinceEpoch(
 //            e.currentPosition.toInt(),
 //            isUtc: true);
@@ -1222,29 +1390,30 @@ class _ChatHomeState extends State<ChatHome> {
 //
 //
 
-        String d = DateTime.fromMicrosecondsSinceEpoch(
-                DateTime.now().millisecondsSinceEpoch * 1000)
-            .toString()
-            .substring(0, 19);
-        this.setState(() {
-          this._recorderTxt = d;
+          String d = DateTime.fromMicrosecondsSinceEpoch(
+                  DateTime.now().millisecondsSinceEpoch * 1000)
+              .toString()
+              .substring(0, 19);
+          this.setState(() {
+            this._recorderTxt = d;
+          });
         });
-      });
-      _dbPeakSubscription =
-          flutterSound.onRecorderDbPeakChanged.listen((value) {
-        print("got update -> $value");
-        setState(() {
-          this._dbLevel = value;
+        _dbPeakSubscription =
+            flutterSound.onRecorderDbPeakChanged.listen((value) {
+          print("got update -> $value");
+          setState(() {
+            this._dbLevel = value;
+          });
         });
-      });
 
-      this.setState(() {
-        this._isRecording = true;
-      });
-    } catch (err) {
-      print('startRecorder error: $err');
+        this.setState(() {
+          this._isRecording = true;
+        });
+      } catch (err) {
+        print('startRecorder error: $err');
+      }
     }
-  }}
+  }
 
   String _path = '';
 
@@ -1260,13 +1429,16 @@ class _ChatHomeState extends State<ChatHome> {
         _dbPeakSubscription.cancel();
         _dbPeakSubscription = null;
       }
-      print("xxxxxxxxxx1111111111111" + result);
       File v = new File(_path);
       print(v.readAsBytesSync());
       String s = base64.encode(v.readAsBytesSync());
-
-      print(s);
-      await _sendTextVoid(s);
+      this.dataxx = s;
+      if ((_endTime - _startTime) > 1000) {
+        _luying();
+      } else {
+        Toast.toast(context, '语音时间太短！');
+      }
+//      await _sendTextVoid(s);
 //      List<int> a = base64.decode(s);
 //      print(a);
 //      ff.writeAsBytesSync(a);
@@ -1280,46 +1452,10 @@ class _ChatHomeState extends State<ChatHome> {
     }
   }
 
-  _uf() async {
-    String field = "picture-upload";
-    List<int> bytes = new File(_path).readAsBytesSync();
-    var boundary = _boundaryString();
-    String contentType = 'multipart/form-data; boundary=$boundary';
-    Map headers =
-        _makeHttpHeaders(contentType, "*/*", ''); //, "XMLHttpRequest");
-    String file_contentType;
-    // 构造文件字段数据
-    String data = '--$boundary\r\nContent-Disposition: form-data; name="$field"; ' +
-        'filename="default.m4a"\r\nContent-Type: ' +
-        '${(file_contentType == null) ? getMediaType('.m4a') : file_contentType}\r\n\r\n';
-    var controller = new StreamController<List<int>>(sync: true);
-    controller.add(data.codeUnits);
-    controller.add(bytes);
-    controller.add("\r\n--$boundary--\r\n".codeUnits);
-    controller.close();
-
-//    bytes =  controller.stream;
-
-    http.MultipartFile.fromPath('default.m4a', _path);
-    String url = Config().host + "/chat?&token=" + _token;
-    final http.Response response = await http.post(
-        'https://so-what.cc/file/upload',
-        headers: headers,
-        body: controller.stream);
-    Utf8Decoder utf8decoder = new Utf8Decoder();
-    Map data1 = json.decode(utf8decoder.convert(response.bodyBytes));
-    print(data1);
-    var result = data1['code'];
-    if (result == 0) {
-      setState(() {
-        _getNewChatData(1);
-      });
-    } else {
-      Toast.toast(context, data1['msg']);
-    }
-  }
+  String dataxx;
 
   void startPlayer(String data) async {
+    _ctXlGxx();
 //    if (_isPlaying) {
 //      stopPlayer();
 //      return;
@@ -1347,23 +1483,29 @@ class _ChatHomeState extends State<ChatHome> {
             max_duration = e.duration;
 
             String d = DateTime.fromMicrosecondsSinceEpoch(
-                DateTime
-                    .now()
-                    .millisecondsSinceEpoch * 1000)
+                    DateTime.now().millisecondsSinceEpoch * 1000)
                 .toString()
                 .substring(0, 19);
             this.setState(() {
               this._isPlaying = true;
               this._playerTxt = d;
             });
+          } else {
+            _bofangId = 0;
+            _ctXl2.cancel();
           }
         });
+//        _bofangId = 0;
+//        _ctXl2.cancel();
       } catch (err) {
         print('error: $err');
       }
     }
   }
+
   void stopPlayer() async {
+    _bofangId = 0;
+    _ctXl2.cancel();
     try {
       String result = await flutterSound.stopPlayer();
       print('stopPlayer: $result');

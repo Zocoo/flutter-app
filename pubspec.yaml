@@ -25,7 +25,7 @@ dependencies:
   exifdart: ^0.7.0+3
   local_notifications: 0.0.3
   flutter_sound: ^1.4.0
-  intl: ^0.15.6
+#  intl: ^0.15.6
 
 dev_dependencies:
   flutter_test:
@@ -49,3 +49,7 @@ flutter:
   - img/ic_stop.png
   - img/ic_volume_down.png
   - img/ic_volume_up.png
+  - img/luyin.gif
+  - img/luyin.png
+  - img/yyr.png
+  - img/yyl.png
