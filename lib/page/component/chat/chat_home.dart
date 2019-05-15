@@ -371,7 +371,7 @@ class _ChatHomeState extends State<ChatHome> {
   }
 
   uploadPic(data1) async {
-    var url = Config().serverUrl + '/file/uploadBase64';
+    var url = Config().host + '/file/uploadBase64';
     try {
       final http.Response response = await http.post(url, body: data1);
       var data = json.decode(response.body);
