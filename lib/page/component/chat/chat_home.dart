@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter_drag_scale/flutter_drag_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -904,31 +904,58 @@ class _ChatHomeState extends State<ChatHome> {
                   ),
                 ),
                 Flexible(
-                  child: Container(
-                    padding: EdgeInsets.only(left: 10),
-                    width: 200,
-                    child: Column(
-                      children: <Widget>[
-                        new ClipRRect(
-                          borderRadius: BorderRadius.circular(6.0),
-                          child: CachedNetworkImage(
-                              imageUrl: _list[index].content +
-                                  "?x-oss-process=image/resize,m_lfit,h_500,w_500"),
-                        ),
-                        Container(
-                          child: Text(
-                            DateTime.fromMicrosecondsSinceEpoch(
-                                    _list[index].createAt * 1000 * 1000)
-                                .toString()
-                                .substring(0, 19),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Color.fromARGB(255, 200, 200, 200)),
+                  child: GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return new AlertDialog(
+                            content: SingleChildScrollView(
+                              child: Container(
+                                height: 400.0,
+                                width: double.infinity,
+                                child: Center(
+                                  child: DragScaleContainer(
+                                    doubleTapStillScale: true,
+                                    child: new Image(
+                                      image: new NetworkImage(
+                                          _list[index].content),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.only(left: 10),
+                      width: 200,
+                      child: Column(
+                        children: <Widget>[
+                          new ClipRRect(
+                            borderRadius: BorderRadius.circular(6.0),
+                            child: CachedNetworkImage(
+                                imageUrl: _list[index].content +
+                                    "?x-oss-process=image/resize,m_lfit,h_500,w_500"),
                           ),
-                        ),
-                      ],
+                          Container(
+                            child: Text(
+                              DateTime.fromMicrosecondsSinceEpoch(
+                                      _list[index].createAt * 1000 * 1000)
+                                  .toString()
+                                  .substring(0, 19),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color.fromARGB(255, 200, 200, 200)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1135,31 +1162,58 @@ class _ChatHomeState extends State<ChatHome> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Flexible(
-                  child: Container(
-                    padding: EdgeInsets.only(right: 10),
-                    width: 200,
-                    child: Column(
-                      children: <Widget>[
-                        new ClipRRect(
-                          borderRadius: BorderRadius.circular(6.0),
-                          child: CachedNetworkImage(
-                              imageUrl: _list[index].content +
-                                  "?x-oss-process=image/resize,m_lfit,h_500,w_500"),
-                        ),
-                        Container(
-                          child: Text(
-                            DateTime.fromMicrosecondsSinceEpoch(
-                                    _list[index].createAt * 1000 * 1000)
-                                .toString()
-                                .substring(0, 19),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: Color.fromARGB(255, 200, 200, 200)),
+                  child: GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return new AlertDialog(
+                            content: SingleChildScrollView(
+                              child: Container(
+                                height: 400.0,
+                                width: double.infinity,
+                                child: Center(
+                                  child: DragScaleContainer(
+                                    doubleTapStillScale: true,
+                                    child: new Image(
+                                      image: new NetworkImage(
+                                          _list[index].content),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.only(right: 10),
+                      width: 200,
+                      child: Column(
+                        children: <Widget>[
+                          new ClipRRect(
+                            borderRadius: BorderRadius.circular(6.0),
+                            child: CachedNetworkImage(
+                                imageUrl: _list[index].content +
+                                    "?x-oss-process=image/resize,m_lfit,h_500,w_500"),
                           ),
-                        ),
-                      ],
+                          Container(
+                            child: Text(
+                              DateTime.fromMicrosecondsSinceEpoch(
+                                      _list[index].createAt * 1000 * 1000)
+                                  .toString()
+                                  .substring(0, 19),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color.fromARGB(255, 200, 200, 200)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1617,7 +1671,7 @@ class _ChatHomeState extends State<ChatHome> {
     }
   }
 
-  static String accesskey = ''; // 你的key
+  static String accesskey = Config().ossKey; // 你的key
 
 //进行utf8 编码
   static List<int> key = utf8.encode(accesskey);

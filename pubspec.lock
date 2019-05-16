@@ -104,6 +104,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.5"
+  flutter_drag_scale:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "8a9fbd918bc0333216c7704342246b498c05a419"
+      url: "https://github.com/LiuC520/flutter_drag_scale.git"
+    source: git
+    version: "0.0.1"
   flutter_image_compress:
     dependency: "direct main"
     description:
