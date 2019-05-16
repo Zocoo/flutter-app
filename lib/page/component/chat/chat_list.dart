@@ -49,7 +49,7 @@ class _ChatListState extends State<ChatList> {
     final http.Response response = await http.get(url);
     Utf8Decoder utf8decoder = new Utf8Decoder();
     Map data = json.decode(utf8decoder.convert(response.bodyBytes));
-    print(data);
+//    print(data);
     var result = data['code'];
     if (result == 0) {
       List<Chat> list = [];
@@ -94,7 +94,9 @@ class _ChatListState extends State<ChatList> {
               id: _list[index].friendId == _id
                   ? _list[index].userId
                   : _list[index].friendId,
-              name: _list[index].userName);
+              name:  _id == _list[index].friendId
+                  ? _list[index].myName
+                  : _list[index].userName);
         })).then((result) {
           _initData();
         });
@@ -139,7 +141,8 @@ class _ChatListState extends State<ChatList> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               fontSize: 16,
-                              color: _list[index].type == 2
+                              color: (_list[index].type == 2 ||
+                                      _list[index].type == 3)
                                   ? Colors.blue
                                   : Color.fromARGB(255, 100, 100, 100)),
                         ),

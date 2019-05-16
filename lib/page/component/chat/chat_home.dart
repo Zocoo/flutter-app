@@ -1,21 +1,20 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
+import 'package:exifdart/exifdart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_wyz/config/config.dart';
 import 'package:flutter_wyz/page/pojo/chat.dart';
 import 'package:flutter_wyz/util/Toast.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:exifdart/exifdart.dart';
-import 'package:flutter_sound/flutter_sound.dart';
-
-//import 'package:intl/intl.dart' show DateFormat;
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
@@ -226,7 +225,7 @@ class _ChatHomeState extends State<ChatHome> {
                 Text('语音录制完毕！'),
                 IconButton(
                   onPressed: () {
-                    startPlayer(dataxx);
+                    startPlayer(dataxxx);
                   },
                   icon: Icon(Icons.play_circle_outline),
                 ),
@@ -425,6 +424,9 @@ class _ChatHomeState extends State<ChatHome> {
     if ((_endTime - _startTime) > 1000) {
       _msgController.text = "";
       String url = Config().host + "/chat?&token=" + _token;
+      print(dataxx.length);
+      print(_id);
+      print(_userId);
       String datax = json.encode({
         'content': dataxx + "-" + (_endTime - _startTime).toString(),
         'userId': _userId,
@@ -601,8 +603,9 @@ class _ChatHomeState extends State<ChatHome> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 GestureDetector(
-//    onLongPressDragUp: (r) { //flutter sdk 1.2.1
-                  onLongPressUp: () {// flutter sdk 1.54
+                  onLongPressDragUp: (r) {
+                    //flutter sdk 1.2.1
+//                  onLongPressUp: () {// flutter sdk 1.54
                     _endTime = DateTime.now().millisecondsSinceEpoch;
                     print(_endTime);
                     print(_endTime - _startTime);
@@ -613,8 +616,9 @@ class _ChatHomeState extends State<ChatHome> {
 //                    Navigator.pop(context);
 //                    if (_ctXl1 != null) _ctXl1.cancel();
                   },
-//    onLongPressDragStart: (r) {  // flutter sdk 1.2.1
-                  onLongPressStart: (r) {// flutter sdk 1.5.4
+                  onLongPressDragStart: (r) {
+                    // flutter sdk 1.2.1
+//                  onLongPressStart: (r) {// flutter sdk 1.5.4
                     _startTime = DateTime.now().millisecondsSinceEpoch;
                     print(_startTime);
                     this.startRecorder();
@@ -876,7 +880,7 @@ class _ChatHomeState extends State<ChatHome> {
         );
       } else if (_list[index].type == 2) {
         // 收到的图片消息
-        print("xx");
+//        print("xx");
         return Offstage(
           offstage: _xs,
           child: Container(
@@ -933,7 +937,7 @@ class _ChatHomeState extends State<ChatHome> {
           ),
         );
       } else {
-        print("xxx");
+//        print("xxx");
         String t = _list[index].content.split('-')[1];
         t = t.substring(0, t.length - 3);
 //        print(t);
@@ -1372,12 +1376,15 @@ class _ChatHomeState extends State<ChatHome> {
   }
 
   void startRecorder() async {
-    bool res = await SimplePermissions.checkPermission(
-        Permission.WriteExternalStorage);
-    print(res);
-    if (!res) {
-      await SimplePermissions.requestPermission(
+    bool res = true;
+    if (Platform.isAndroid) {
+      res = await SimplePermissions.checkPermission(
           Permission.WriteExternalStorage);
+      print(res);
+      if (!res) {
+        await SimplePermissions.requestPermission(
+            Permission.WriteExternalStorage);
+      }
     }
     if (res) {
       try {
@@ -1431,21 +1438,24 @@ class _ChatHomeState extends State<ChatHome> {
         _dbPeakSubscription.cancel();
         _dbPeakSubscription = null;
       }
-      File v = new File(_path);
-      print(v.readAsBytesSync());
+      String p = '';
+      if (_path.contains("file:///")) {
+        p = _path.replaceAll("file://", "");
+      } else {
+        p = _path;
+      }
+      File v = new File(p);
+
+      print(v.readAsBytesSync().length);
       String s = base64.encode(v.readAsBytesSync());
-      this.dataxx = s;
+      print(s);
+      this.dataxxx = s;
       if ((_endTime - _startTime) > 1000) {
+        await uploadImage(v);
         _luying();
       } else {
         Toast.toast(context, '语音时间太短！');
       }
-//      await _sendTextVoid(s);
-//      List<int> a = base64.decode(s);
-//      print(a);
-//      ff.writeAsBytesSync(a);
-//      print(ff.readAsBytesSync());
-//      _uf();
       this.setState(() {
         this._isRecording = false;
       });
@@ -1454,6 +1464,7 @@ class _ChatHomeState extends State<ChatHome> {
     }
   }
 
+  String dataxxx;
   String dataxx;
 
   void startPlayer(String data) async {
@@ -1462,22 +1473,34 @@ class _ChatHomeState extends State<ChatHome> {
 //      stopPlayer();
 //      return;
 //    }
-    bool res = await SimplePermissions.checkPermission(
-        Permission.WriteExternalStorage);
-    print(res);
-    if (!res) {
-      await SimplePermissions.requestPermission(
+    bool res = true;
+    if (Platform.isAndroid) {
+      res = await SimplePermissions.checkPermission(
           Permission.WriteExternalStorage);
+      print(res);
+      if (!res) {
+        await SimplePermissions.requestPermission(
+            Permission.WriteExternalStorage);
+      }
     }
     if (res) {
-      List<int> a = base64.decode(data);
-      var directory = await getExternalStorageDirectory();
-      File ff = new File(directory.path + "/bofang.m4a");
-      ff.writeAsBytesSync(a);
-      String path = await flutterSound.startPlayer(ff.path);
+      String p = "";
+      if (!data.contains("http")) {
+        List<int> a = base64.decode(data);
+        var directory;
+        if (Platform.isAndroid)
+          directory = await getExternalStorageDirectory();
+        else
+          directory = await getTemporaryDirectory();
+        File ff = new File(directory.path + "/bofang.m4a");
+        ff.writeAsBytesSync(a);
+        p = ff.path;
+      } else {
+        p = data.replaceAll("&", "-");
+      }
+      String path = await flutterSound.startPlayer(p);
       await flutterSound.setVolume(1.0);
       print('startPlayer: $path');
-
       try {
         _playerSubscription = flutterSound.onPlayerStateChanged.listen((e) {
           if (e != null) {
@@ -1552,168 +1575,68 @@ class _ChatHomeState extends State<ChatHome> {
   double slider_current_position = 0.0;
   double max_duration = 1.0;
 
-  static String _boundaryString() {
-    var prefix = "---DartFormBoundary";
-    var list = new List<int>.generate(
-        _BOUNDARY_LENGTH - prefix.length,
-        (index) =>
-            _BOUNDARY_CHARACTERS[_random.nextInt(_BOUNDARY_CHARACTERS.length)],
-        growable: false);
-    return "$prefix${new String.fromCharCodes(list)}";
+  uploadImage(File file) async {
+    //签名
+    BaseOptions options = new BaseOptions();
+    options.responseType = ResponseType.plain;
+
+//创建dio对象
+    Dio dio = new Dio(options);
+
+//文件名
+//    String fileName = "uploadImage.jpg";
+
+//创建一个formdata，作为dio的参数
+    FormData data = new FormData.from({
+      'Filename': _startTime.toString() + ".m4a",
+      'key': "m4a/" + _startTime.toString() + ".m4a",
+      'policy': policy_base64,
+      'OSSAccessKeyId': "LTAIltvRb1U8UUiC",
+      'success_action_status': '200', //让服务端返回200，不然，默认会返回204
+      'signature': signature,
+      'file': new UploadFileInfo(file, "imageFileName")
+    });
+
+    try {
+      Response response = await dio.post(
+          "http://we-chat-manager.oss-cn-beijing.aliyuncs.com",
+          data: data);
+      print(response.headers);
+      print("sfsfdsfsfsfs" + response.data);
+      this.dataxx = "https://we&chat&manager.oss&cn&beijing.aliyuncs.com/m4a/" +
+          _startTime.toString() +
+          ".m4a";
+      this.setState(() {
+        this._isRecording = false;
+      });
+    } on DioError catch (e) {
+      print(e.message);
+      print(e.response.data);
+      print(e.response.headers);
+      print(e.response.request);
+    }
   }
 
-  static String randomStr(
-      [int len = 8, List<int> chars = _BOUNDARY_CHARACTERS]) {
-    var list = new List<int>.generate(
-        len, (index) => chars[_random.nextInt(chars.length)],
-        growable: false);
-    return new String.fromCharCodes(list);
-  }
+  static String accesskey = '6f9UuyAgFQnJaT3C3YoJKZaAoWMfyM';
 
-  static const List<int> _BOUNDARY_CHARACTERS = const <int>[
-    0x30,
-    0x31,
-    0x32,
-    0x33,
-    0x34,
-    0x35,
-    0x36,
-    0x37,
-    0x38,
-    0x39,
-    0x61,
-    0x62,
-    0x63,
-    0x64,
-    0x65,
-    0x66,
-    0x67,
-    0x68,
-    0x69,
-    0x6A,
-    0x6B,
-    0x6C,
-    0x6D,
-    0x6E,
-    0x6F,
-    0x70,
-    0x71,
-    0x72,
-    0x73,
-    0x74,
-    0x75,
-    0x76,
-    0x77,
-    0x78,
-    0x79,
-    0x7A,
-    0x41,
-    0x42,
-    0x43,
-    0x44,
-    0x45,
-    0x46,
-    0x47,
-    0x48,
-    0x49,
-    0x4A,
-    0x4B,
-    0x4C,
-    0x4D,
-    0x4E,
-    0x4F,
-    0x50,
-    0x51,
-    0x52,
-    0x53,
-    0x54,
-    0x55,
-    0x56,
-    0x57,
-    0x58,
-    0x59,
-    0x5A
-  ];
-  static const int _BOUNDARY_LENGTH = 48;
-  static final Random _random = new Random();
+//进行utf8 编码
+  static List<int> key = utf8.encode(accesskey);
 
-  static Map _makeHttpHeaders(
-      [String contentType,
-      String accept,
-      String token,
-      String XRequestWith,
-      String XMethodOverride]) {
-    Map headers = new Map<String, String>();
-    int i = 0;
+//通过hmac,使用sha1进行加密
+  static List<int> signature_pre = new Hmac(sha1, key).convert(policy).bytes;
 
-    if (contentType != null && contentType.length > 0) {
-      i++;
-      headers["Content-Type"] = contentType;
-    }
+//最后一步，将上述所得进行base64 编码
+  String signature = base64.encode(signature_pre);
 
-    if (accept != null && accept.length > 0) {
-      i++;
-      headers["Accept"] = accept;
-    }
+  static String policyText =
+      '{"expiration": "2020-01-01T12:00:00.000Z","conditions": [["content-length-range", 0, 1048576000]]}';
 
-    if (token != null && token.length > 0) {
-      i++;
-      headers["Authorization"] = "bearer " + token;
-    }
+//进行utf8编码
+  static List<int> policyText_utf8 = utf8.encode(policyText);
 
-    if (XRequestWith != null && XRequestWith.length > 0) {
-      i++;
-      headers["X-Requested-With"] = XRequestWith;
-    }
+//进行base64编码
+  static String policy_base64 = base64.encode(policyText_utf8);
 
-    if (XMethodOverride != null && XMethodOverride.length > 0) {
-      i++;
-      headers["X-HTTP-Method-Override"] = XMethodOverride;
-    }
-
-    if (i == 0) return null;
-    // print(headers.toString());
-    return headers;
-  }
-
-  static MediaType getMediaType(final String fileExt) {
-    switch (fileExt) {
-      case ".jpg":
-      case ".jpeg":
-      case ".jpe":
-        return new MediaType("image", "jpeg");
-      case ".png":
-        return new MediaType("image", "png");
-      case ".bmp":
-        return new MediaType("image", "bmp");
-      case ".gif":
-        return new MediaType("image", "gif");
-      case ".json":
-        return new MediaType("application", "json");
-      case ".svg":
-      case ".svgz":
-        return new MediaType("image", "svg+xml");
-      case ".mp3":
-        return new MediaType("audio", "mpeg");
-      case ".m4a":
-        return new MediaType("audio", "mpeg");
-      case ".mp4":
-        return new MediaType("video", "mp4");
-      case ".htm":
-      case ".html":
-        return new MediaType("text", "html");
-      case ".css":
-        return new MediaType("text", "css");
-      case ".csv":
-        return new MediaType("text", "csv");
-      case ".txt":
-      case ".text":
-      case ".conf":
-      case ".def":
-      case ".log":
-      case ".in":
-        return new MediaType("text", "plain");
-    }
-    return null;
-  }
+//再次进行utf8编码
+  static List<int> policy = utf8.encode(policy_base64);
 }

@@ -7,6 +7,8 @@ PODS:
     - Flutter
   - flutter_image_compress (0.0.1):
     - Flutter
+  - flutter_sound (0.0.1):
+    - Flutter
   - image_crop (0.0.1):
     - Flutter
   - image_picker (0.0.1):
@@ -28,6 +30,7 @@ DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
+  - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
   - image_crop (from `.symlinks/plugins/image_crop/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
@@ -49,6 +52,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_downloader/ios"
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
+  flutter_sound:
+    :path: ".symlinks/plugins/flutter_sound/ios"
   image_crop:
     :path: ".symlinks/plugins/image_crop/ios"
   image_picker:
@@ -69,6 +74,7 @@ SPEC CHECKSUMS:
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
   flutter_image_compress: c29e818cdf6e4276875601a245b6bb18eb444157
+  flutter_sound: 0e8163ceac1e00eb6d894e2ae4641ba726a2c479
   image_crop: e0a67085d3ebf3cf46ca46d61c53a082507b0bc3
   image_picker: a211f28b95a560433c00f5cd3773f4710a20404d
   MTBBarcodeScanner: 5b97f10a037e2560ff104da413343c5ce9413911
@@ -78,6 +84,6 @@ SPEC CHECKSUMS:
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
   simple_permissions: a6834dbad830eee541e62be161f96c75121dc4ab
 
-PODFILE CHECKSUM: 385dbfa0cd0ce046b1730e9ce07887b983ce9a9c
+PODFILE CHECKSUM: 2764be9daecd122206af69db42c21f522b736806
 
 COCOAPODS: 1.6.1

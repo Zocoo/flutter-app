@@ -11,7 +11,7 @@ import 'package:flutter_wyz/page/content/email_screen.dart';
 import 'package:flutter_wyz/page/content/home_screen.dart';
 import 'package:flutter_wyz/page/content/pages_screen.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
-import 'package:local_notifications/local_notifications.dart';
+import 'package:local_notifications/local_notifications.dart';   //android only
 
 class Index extends StatefulWidget {
   @override
@@ -56,12 +56,11 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
       }
     });
   }
-
+// android only
   static _onNotificationClick(String payload) {
     LocalNotifications.removeNotification(_idX);
     print("消息已被阅读");
   }
-
   static const AndroidNotificationChannel channel =
       const AndroidNotificationChannel(
           id: 'default_notification',
@@ -75,7 +74,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
     final http.Response response = await http.get(url);
     Utf8Decoder utf8decoder = new Utf8Decoder();
     Map data = json.decode(utf8decoder.convert(response.bodyBytes));
-    print(data);
+//    print(data);
     var result = data['code'];
     if (result == 0) {
       await LocalStorage().set("havaNewMsg", '1');
@@ -84,6 +83,8 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
         var tz = await LocalStorage().get("tz101");
         if (tz == 'yes') {
           _idX++;
+
+          //android only
           await LocalNotifications.createAndroidNotificationChannel(
               channel: channel);
           await LocalNotifications.createNotification(
