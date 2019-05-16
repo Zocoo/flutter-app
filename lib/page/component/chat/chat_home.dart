@@ -1617,7 +1617,7 @@ class _ChatHomeState extends State<ChatHome> {
     }
   }
 
-  static String accesskey = '6f9UuyAgFQnJaT3C3YoJKZaAoWMfyM';
+  static String accesskey = ''; // 你的key
 
 //进行utf8 编码
   static List<int> key = utf8.encode(accesskey);
