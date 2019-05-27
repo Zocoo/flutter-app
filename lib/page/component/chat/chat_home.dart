@@ -603,9 +603,9 @@ class _ChatHomeState extends State<ChatHome> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 GestureDetector(
-                  onLongPressDragUp: (r) {
+//                  onLongPressDragUp: (r) {
                     //flutter sdk 1.2.1
-//                  onLongPressUp: () {// flutter sdk 1.54
+                  onLongPressUp: () {// flutter sdk 1.54
                     _endTime = DateTime.now().millisecondsSinceEpoch;
                     print(_endTime);
                     print(_endTime - _startTime);
@@ -616,9 +616,9 @@ class _ChatHomeState extends State<ChatHome> {
 //                    Navigator.pop(context);
 //                    if (_ctXl1 != null) _ctXl1.cancel();
                   },
-                  onLongPressDragStart: (r) {
+//                  onLongPressDragStart: (r) {
                     // flutter sdk 1.2.1
-//                  onLongPressStart: (r) {// flutter sdk 1.5.4
+                  onLongPressStart: (r) {// flutter sdk 1.5.4
                     _startTime = DateTime.now().millisecondsSinceEpoch;
                     print(_startTime);
                     this.startRecorder();

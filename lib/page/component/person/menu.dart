@@ -6,6 +6,8 @@ import 'package:flutter_wyz/page/login/login.dart';
 import 'package:flutter_wyz/util/Toast.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
 
+import 'device_list.dart';
+
 class Menu extends StatefulWidget {
   @override
   _MenuState createState() => _MenuState();
@@ -61,6 +63,38 @@ class _MenuState extends State<Menu> {
           child: Container(
             child: Column(
               children: <Widget>[
+                Container(
+                  height: 2,
+                  color: Colors.black12,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        new MaterialPageRoute(builder: (BuildContext context) {
+                          return DeviceList();
+                        }));
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 1, left: 35, right: 15),
+                    child: Container(
+                      color: Colors.white,
+                      height: 45,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            '设备列表',
+                            style: TextStyle(fontSize: 18, color: Colors.black),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.blueAccent,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 Container(
                   height: 2,
                   color: Colors.black12,
