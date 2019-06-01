@@ -7,6 +7,7 @@ import 'package:flutter_wyz/page/pojo/device.dart';
 import 'package:flutter_wyz/util/Toast.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
 
+import 'add_device.dart';
 import 'device_info.dart';
 
 class DeviceList extends StatefulWidget {
@@ -121,7 +122,7 @@ class _DeviceListState extends State<DeviceList> {
         onPressed: () {
           Navigator.push(context,
                   new MaterialPageRoute(builder: (BuildContext context) {
-//                return MsgAdd();
+                return AddDevice();
           }))
               .then((result) {
             _initData();

@@ -25,6 +25,7 @@ dependencies:
   exifdart: ^0.7.0+3
   dio: ^2.0.0
   flutter_sound: ^1.4.0
+  wifi: 0.1.4
   flutter_drag_scale:
     git: https://github.com/LiuC520/flutter_drag_scale.git
   #  android only 如果在苹果手机或者苹果虚拟机上运行，请注释掉local_notifications

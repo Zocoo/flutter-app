@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:flutter_wyz/config/config.dart';
-import 'package:flutter_wyz/page/pojo/device.dart';
 import 'package:flutter_wyz/util/Toast.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
 
