@@ -8,6 +8,7 @@ import 'package:flutter_wyz/util/Toast.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
 
 import 'add_device.dart';
+import 'device_hj.dart';
 import 'device_info.dart';
 
 class DeviceList extends StatefulWidget {
@@ -57,13 +58,23 @@ class _DeviceListState extends State<DeviceList> {
     String name = _c[1];
     return GestureDetector(
       onTap: () {
-        Navigator.push(context,
-            new MaterialPageRoute(builder: (BuildContext context) {
-          return DeviceInfo(
-              id: _list[index].id, name: name, cid: _list[index].sn);
-        })).then((result) {
-          _initData();
-        });
+        if (_list[index].type == 'cz')
+          Navigator.push(context,
+              new MaterialPageRoute(builder: (BuildContext context) {
+            return DeviceInfo(
+                id: _list[index].id, name: name, cid: _list[index].sn);
+          })).then((result) {
+            _initData();
+          });
+        else if(_list[index].type == 'hj'){
+          Navigator.push(context,
+              new MaterialPageRoute(builder: (BuildContext context) {
+                return DeviceHJ(
+                    id: _list[index].id, name: name, cid: _list[index].sn);
+              })).then((result) {
+            _initData();
+          });
+        }
       },
       child: Card(
         child: Container(
@@ -121,10 +132,9 @@ class _DeviceListState extends State<DeviceList> {
         isExtended: true,
         onPressed: () {
           Navigator.push(context,
-                  new MaterialPageRoute(builder: (BuildContext context) {
-                return AddDevice();
-          }))
-              .then((result) {
+              new MaterialPageRoute(builder: (BuildContext context) {
+            return AddDevice();
+          })).then((result) {
             _initData();
           });
         },

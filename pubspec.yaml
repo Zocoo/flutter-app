@@ -59,6 +59,8 @@ flutter:
   - img/yyr.png
   - img/yyl.png
   - img/ld.gif
-  - on.png
-  - off.png
-  - lx.png
+  - img/on.png
+  - img/off.png
+  - img/lx.png
+  - img/wd.png
+  - img/sd.png
