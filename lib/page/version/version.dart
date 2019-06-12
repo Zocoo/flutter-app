@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_wyz/config/config.dart';
 import 'package:flutter_wyz/page/login/login.dart';
@@ -26,7 +28,18 @@ class _VersionState extends State<Version> with SingleTickerProviderStateMixin {
   bool _a_status = false;
   bool _v_status = false;
   BuildContext _b = null;
-
+  Timer _ctXl;
+  @override
+  void dispose() {
+    if (null != _ctXl) _ctXl.cancel();
+    super.dispose();
+  }
+  _ctXlGx() async {
+    checkVersion();
+    _ctXl = Timer.periodic(new Duration(milliseconds: 3000), (timer) {
+      checkVersion();
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -55,7 +68,7 @@ class _VersionState extends State<Version> with SingleTickerProviderStateMixin {
   }
 
   _VersionState() {
-    checkVersion();
+    _ctXlGx();
   }
 
   notUpdate() {
