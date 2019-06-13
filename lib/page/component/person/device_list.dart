@@ -22,7 +22,14 @@ class _DeviceListState extends State<DeviceList> {
   _DeviceListState() {
     _initData();
   }
+  Future<Null> _flush() async {
 
+    setState(() {
+      _list = [];
+    });
+    _initData();
+    return;
+  }
   _initData() async {
     String id = await LocalStorage().get("userId");
     String token = await LocalStorage().get("token");
@@ -152,12 +159,14 @@ class _DeviceListState extends State<DeviceList> {
             ),
           )
         : Container(
+        child: RefreshIndicator(
             child: ListView.builder(
               itemCount: _list.length,
               itemBuilder: (context, index) {
                 return _displayOneDevice(index);
               },
-            ),
+            ),onRefresh: _flush,
+        ),
           );
   }
 }

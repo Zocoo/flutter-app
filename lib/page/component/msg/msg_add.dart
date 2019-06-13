@@ -19,6 +19,28 @@ class _MsgAddState extends State<MsgAdd> {
   TextEditingController _pwdcontroller1 = new TextEditingController();
   List<String> _listPic = [];
 
+  Future getImage1() async {
+    _uploadIng();
+    File image = await ImagePicker.pickImage(source: ImageSource.camera);
+    print(image.path);
+    if (image.path.endsWith("jpg") ||
+        image.path.endsWith("jpeg") ||
+        image.path.endsWith("png")) {
+      if (image.lengthSync() > 214061) {
+        testCompressFile(image);
+      } else {
+        var image_base64 = base64.encode(image.readAsBytesSync());
+        uploadPic(image_base64);
+      }
+    } else {
+      var image_base64 = base64.encode(image.readAsBytesSync());
+      uploadPic(image_base64);
+    }
+//    testCompressFile(image);
+//    var image_base64 = base64.encode(image.readAsBytesSync());
+//    uploadPic(image_base64);
+  }
+
   Future getImage() async {
     _uploadIng();
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -40,6 +62,7 @@ class _MsgAddState extends State<MsgAdd> {
 //    var image_base64 = base64.encode(image.readAsBytesSync());
 //    uploadPic(image_base64);
   }
+
   Future<int> getImageRotateAngular(List<int> bytes) async {
     Map<String, dynamic> tags = await readExif(MemoryBlobReader(bytes));
     if (tags == null || tags['Orientation'] == null) return 0;
@@ -55,6 +78,7 @@ class _MsgAddState extends State<MsgAdd> {
         return 0;
     }
   }
+
   Future<List<int>> testCompressFile(File file) async {
     int r = await getImageRotateAngular(file.readAsBytesSync());
     var result = await FlutterImageCompress.compressWithFile(
@@ -100,12 +124,79 @@ class _MsgAddState extends State<MsgAdd> {
     }
   }
 
+  Widget choice(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: Text('提示'),
+          content: SingleChildScrollView(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    getImage1();
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          getImage1();
+                        },
+                        icon: Icon(Icons.camera_alt),
+                      ),
+                      Text('拍照'),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    getImage();
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          getImage();
+                        },
+                        icon: Icon(Icons.image),
+                      ),
+                      Text('相册'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _getPic(int i) {
     print(_listPic.length);
     if (i == _listPic.length && _listPic.length != 9) {
       return GestureDetector(
         onTap: () {
-          getImage();
+          choice(context);
         },
         child: Container(
           decoration: BoxDecoration(

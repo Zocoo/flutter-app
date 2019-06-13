@@ -311,7 +311,72 @@ class _ChatHomeState extends State<ChatHome> {
       return _list[_list.length - 1].id;
     }
   }
-
+  Widget choice(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: Text('提示'),
+          content: SingleChildScrollView(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    getImage1();
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          getImage1();
+                        },
+                        icon: Icon(Icons.camera_alt),
+                      ),
+                      Text('拍照'),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    getImage();
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          getImage();
+                        },
+                        icon: Icon(Icons.image),
+                      ),
+                      Text('相册'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
   Future getImage() async {
     _tb = true;
     _maxN = 0;
@@ -335,7 +400,29 @@ class _ChatHomeState extends State<ChatHome> {
       }
     }
   }
-
+  Future getImage1() async {
+    _tb = true;
+    _maxN = 0;
+    _minM = 0;
+    File image = await ImagePicker.pickImage(source: ImageSource.camera);
+    if (null != image) {
+      print(image.path);
+//    print(image.h);
+      if (image.path.endsWith("jpg") ||
+          image.path.endsWith("jpeg") ||
+          image.path.endsWith("png")) {
+        if (image.lengthSync() > 214061) {
+          testCompressFile(image);
+        } else {
+          var image_base64 = base64.encode(image.readAsBytesSync());
+          uploadPic(image_base64);
+        }
+      } else {
+        var image_base64 = base64.encode(image.readAsBytesSync());
+        uploadPic(image_base64);
+      }
+    }
+  }
   Future<List<int>> testCompressFile(File file) async {
     int r = await getImageRotateAngular(file.readAsBytesSync());
     print(r);
@@ -789,7 +876,7 @@ class _ChatHomeState extends State<ChatHome> {
         onTap: () {
           print(index);
           if (index == 0) {
-            getImage();
+            choice(context);
           } else {
             _sendImgMsg(_mrPic[index]);
           }
