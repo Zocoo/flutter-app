@@ -17,10 +17,9 @@ class DeviceHJ extends StatefulWidget {
 }
 
 class _DeviceHJState extends State<DeviceHJ> {
-
   @override
-  void dispose(){
-    if(null != _ctXl) _ctXl.cancel();
+  void dispose() {
+    if (null != _ctXl) _ctXl.cancel();
     super.dispose();
   }
 
@@ -32,6 +31,7 @@ class _DeviceHJState extends State<DeviceHJ> {
     _initData();
   }
 
+  List<Map<String, String>> _list = [];
   String _cid;
   String _id;
   String _name = '';
@@ -44,7 +44,7 @@ class _DeviceHJState extends State<DeviceHJ> {
   }
 
   _ctXlGx() {
-    _ctXl = Timer.periodic(new Duration(milliseconds: 10000), (timer) {
+    _ctXl = Timer.periodic(new Duration(milliseconds: 5000), (timer) {
       _readTH();
     });
   }
@@ -59,6 +59,7 @@ class _DeviceHJState extends State<DeviceHJ> {
     print(data);
     var result = data['code'];
     if (result == 0) {
+      Map<String, String> md = new Map();
       double dt = double.parse(data['data']['data']['t'].toString());
       double dh = double.parse(data['data']['data']['h'].toString());
       print(dt);
@@ -69,57 +70,120 @@ class _DeviceHJState extends State<DeviceHJ> {
       if (dh > -100) {
         _sd = dh.toString();
       }
-      setState(() {});
+      if (dt > -100 && dh > -100) {
+        md['wd'] = dt.toString().replaceAll('.0', '');
+        md['sd'] = dh.toString().replaceAll('.0', '');
+        String at = DateTime.fromMicrosecondsSinceEpoch(
+                DateTime.now().microsecondsSinceEpoch)
+            .toString()
+            .substring(0, 19);
+        at = at.substring(11,at.length);
+
+        md['time'] = at;
+      }
+      if(_list.length > 7){
+        _list.removeAt(0);
+      }
+      setState(() {
+        _list.add(md);
+      });
     } else {
       Toast.toast(context, data['msg']);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      appBar: AppBar(
-        title: Text(_name),
-      ),
-      body: Container(
-        padding: EdgeInsets.only(top: 150),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text('温度'),
-                Image.asset(
-                  'img/wd.png',
-                  height: 60,
-                  width: 60,
-                ),
-                Text(_wd + '°C')
-              ],
-            ),
-            Container(
-              height: 60,
-              width: double.infinity,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text('湿度'),
-                Image.asset(
-                  'img/sd.png',
-                  height: 60,
-                  width: 60,
-                ),
-                Text(_sd + "%")
-              ],
-            ),
-          ],
+  Widget _displayOneDevice(index) {
+    return Container(
+      height: 40,
+      child: Card(
+        child: Center(
+          child: Text('检测时间：' + _list[index]['time'] + "温度：" + _list[index]['wd'] +"°C湿度：" +_list[index]['sd']+"%"),
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+        appBar: AppBar(
+          title: Text(_name),
+        ),
+        body: Column(
+          children: <Widget>[
+            Container(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(top: 100),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          width: 80,
+                          child: Center(
+                            child: Text('温度'),
+                          ),
+                        ),
+                        Image.asset(
+                          'img/wd.png',
+                          height: 60,
+                          width: 60,
+                        ),
+                        Container(
+                          width: 80,
+                          child: Center(
+                            child: Text(_wd.replaceAll('.0', '') + '°C'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: 60,
+                      width: double.infinity,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          width: 80,
+                          child: Center(
+                            child: Text('湿度'),
+                          ),
+                        ),
+                        Image.asset(
+                          'img/sd.png',
+                          height: 60,
+                          width: 60,
+                        ),
+                        Container(
+                          width: 80,
+                          child: Center(
+                            child: Text(_sd.replaceAll(".0", '') + "%"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.only(top: 15),
+                child: ListView.builder(
+                  itemCount: _list.length,
+                  itemBuilder: (context, index) {
+                    return _displayOneDevice(index);
+                  },
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 }

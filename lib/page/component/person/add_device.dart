@@ -18,6 +18,7 @@ class _AddDeviceState extends State<AddDevice> {
     _ctXlGx();
   }
 
+
   int _cg = 0;
   Timer _ctXl;
   Timer _ctX2;
@@ -100,6 +101,7 @@ class _AddDeviceState extends State<AddDevice> {
         Toast.toast(context, '请先填写8位以上密码');
         return;
       }
+      Toast.toast(context, '正在发送密码，请稍等...');
       String url = 'http://192.168.4.1:8079/setWifi?ssid=' +
           _pwdcontroller1.text +
           "&pwd=" +
@@ -230,7 +232,7 @@ class _AddDeviceState extends State<AddDevice> {
       appBar: AppBar(
         title: Text('添加设备'),
       ),
-      body: Container(
+      body:  Container(
         padding: EdgeInsets.only(left: 30, right: 30),
         child: _cdd == 1
             ? Center(
