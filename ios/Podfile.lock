@@ -5,6 +5,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_downloader (0.0.1):
     - Flutter
+  - flutter_drag_scale (0.0.1):
+    - Flutter
   - flutter_image_compress (0.0.1):
     - Flutter
   - flutter_sound (0.0.1):
@@ -24,11 +26,14 @@ PODS:
     - Flutter
   - simple_permissions (0.0.1):
     - Flutter
+  - wifi (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
+  - flutter_drag_scale (from `.symlinks/plugins/flutter_drag_scale/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
   - image_crop (from `.symlinks/plugins/image_crop/ios`)
@@ -38,6 +43,7 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - simple_permissions (from `.symlinks/plugins/simple_permissions/ios`)
+  - wifi (from `.symlinks/plugins/wifi/ios`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -50,6 +56,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/flutter/ios"
   flutter_downloader:
     :path: ".symlinks/plugins/flutter_downloader/ios"
+  flutter_drag_scale:
+    :path: ".symlinks/plugins/flutter_drag_scale/ios"
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
   flutter_sound:
@@ -68,11 +76,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   simple_permissions:
     :path: ".symlinks/plugins/simple_permissions/ios"
+  wifi:
+    :path: ".symlinks/plugins/wifi/ios"
 
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_downloader: 058b9c41564a90500f67f3e432e3524613a7fd83
+  flutter_drag_scale: 545fd546a1e968bd965883f0511b1c47f049f37d
   flutter_image_compress: c29e818cdf6e4276875601a245b6bb18eb444157
   flutter_sound: 0e8163ceac1e00eb6d894e2ae4641ba726a2c479
   image_crop: e0a67085d3ebf3cf46ca46d61c53a082507b0bc3
@@ -83,6 +94,7 @@ SPEC CHECKSUMS:
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
   simple_permissions: a6834dbad830eee541e62be161f96c75121dc4ab
+  wifi: d7d77c94109e36c4175d845f0a5964eadba71060
 
 PODFILE CHECKSUM: 2764be9daecd122206af69db42c21f522b736806
 

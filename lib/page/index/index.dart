@@ -11,7 +11,7 @@ import 'package:flutter_wyz/page/content/email_screen.dart';
 import 'package:flutter_wyz/page/content/home_screen.dart';
 import 'package:flutter_wyz/page/content/pages_screen.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
-import 'package:local_notifications/local_notifications.dart'; //android only
+//import 'package:local_notifications/local_notifications.dart'; //android only
 
 class Index extends StatefulWidget {
   @override
@@ -58,17 +58,17 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
   }
 
 // android only
-  static _onNotificationClick(String payload) {
-    LocalNotifications.removeNotification(_idX);
-    print("消息已被阅读");
-  }
-
-  static const AndroidNotificationChannel channel =
-      const AndroidNotificationChannel(
-          id: 'default_notification',
-          name: 'Default',
-          description: 'Grant this app the ability to show notifications',
-          importance: AndroidNotificationImportance.HIGH);
+//  static _onNotificationClick(String payload) {
+//    LocalNotifications.removeNotification(_idX);
+//    print("消息已被阅读");
+//  }
+//
+//  static const AndroidNotificationChannel channel =
+//      const AndroidNotificationChannel(
+//          id: 'default_notification',
+//          name: 'Default',
+//          description: 'Grant this app the ability to show notifications',
+//          importance: AndroidNotificationImportance.HIGH);
 
   _chatNew() async {
     try {
@@ -88,18 +88,18 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
             _idX++;
 
             //android only
-            await LocalNotifications.createAndroidNotificationChannel(
-                channel: channel);
-            await LocalNotifications.createNotification(
-              title: "遥不可及",
-              content: "您有新消息来了！",
-              id: _idX,
-              androidSettings: new AndroidSettings(channel: channel),
-              onNotificationClick: NotificationAction(
-                  actionText: "",
-                  callback: _onNotificationClick,
-                  payload: "接收成功！"),
-            );
+//            await LocalNotifications.createAndroidNotificationChannel(
+//                channel: channel);
+//            await LocalNotifications.createNotification(
+//              title: "遥不可及",
+//              content: "您有新消息来了！",
+//              id: _idX,
+//              androidSettings: new AndroidSettings(channel: channel),
+//              onNotificationClick: NotificationAction(
+//                  actionText: "",
+//                  callback: _onNotificationClick,
+//                  payload: "接收成功！"),
+//            );
           }
         }
         setState(() {

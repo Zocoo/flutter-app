@@ -29,7 +29,7 @@ dependencies:
   flutter_drag_scale:
     git: https://github.com/LiuC520/flutter_drag_scale.git
   #  android only 如果在苹果手机或者苹果虚拟机上运行，请注释掉local_notifications
-  local_notifications: 0.0.3
+#  local_notifications: 0.0.3
 
 
 dev_dependencies:
