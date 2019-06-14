@@ -42,6 +42,11 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [
+                JPUSH_PKGNAME : "com.wyz.flutter_wyz",
+                JPUSH_APPKEY : "ce53da8fe966805f893421bb", // NOTE: JPush 上注册的包名对应的 Appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
     }
     signingConfigs {
         release {
@@ -58,6 +63,8 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+
 }
 
 flutter {

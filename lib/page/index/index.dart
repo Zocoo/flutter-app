@@ -11,6 +11,7 @@ import 'package:flutter_wyz/page/content/email_screen.dart';
 import 'package:flutter_wyz/page/content/home_screen.dart';
 import 'package:flutter_wyz/page/content/pages_screen.dart';
 import 'package:flutter_wyz/util/local_storage.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 //import 'package:local_notifications/local_notifications.dart'; //android only
 
 class Index extends StatefulWidget {
@@ -19,6 +20,71 @@ class Index extends StatefulWidget {
 }
 
 class IndexState extends State<Index> with WidgetsBindingObserver {
+
+  String debugLable = 'Unknown';
+  final JPush jpush = new JPush();
+
+  Future<void> initPlatformState() async {
+    String platformVersion;
+
+    String id = await LocalStorage().get("userId");
+    print('-----------fff------------->>'+id);
+    jpush.setAlias(id);
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    jpush.getRegistrationID().then((rid) {
+      setState(() {
+        debugLable = "flutter getRegistrationID: $rid";
+        print('000000000000000000000>>>'+rid);
+      });
+    });
+
+    jpush.setup(
+      appKey: "ce53da8fe966805f893421bb",
+      channel: "theChannel",
+      production: false,
+      debug: true,
+    );
+    jpush.applyPushAuthority(new NotificationSettingsIOS(
+        sound: true,
+        alert: true,
+        badge: true));
+
+    try {
+
+      jpush.addEventHandler(
+        onReceiveNotification: (Map<String, dynamic> message) async {
+          print("flutter onReceiveNotification: $message");
+          setState(() {
+            debugLable = "flutter onReceiveNotification: $message";
+          });
+        },
+        onOpenNotification: (Map<String, dynamic> message) async {
+          print("flutter onOpenNotification: $message");
+          setState(() {
+            debugLable = "flutter onOpenNotification: $message";
+          });
+        },
+        onReceiveMessage: (Map<String, dynamic> message) async {
+          print("flutter onReceiveMessage: $message");
+          setState(() {
+            debugLable = "flutter onReceiveMessage: $message";
+          });
+        },
+      );
+
+    } on PlatformException {
+      platformVersion = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      debugLable = platformVersion;
+    });
+  }
   final _bottomNavigationColor = Colors.blue;
   int _currentIndex = 0;
   List<Widget> list = List();
@@ -134,6 +200,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
       ..add(PagesScreen())
       ..add(AirPlayScreen());
     super.initState();
+    initPlatformState();
   }
 
   @override

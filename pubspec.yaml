@@ -24,6 +24,7 @@ dependencies:
   cached_network_image: 0.5.1
   exifdart: ^0.7.0+3
   dio: ^2.0.0
+  jpush_flutter: 0.0.11
   flutter_sound: ^1.4.0
   wifi: 0.1.4
   flutter_drag_scale:
