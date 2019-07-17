@@ -23,7 +23,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
 
   String debugLable = 'Unknown';
   final JPush jpush = new JPush();
-
+  String tsinit = "no";
   Future<void> initPlatformState() async {
     String platformVersion;
 
@@ -200,7 +200,6 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
       ..add(PagesScreen())
       ..add(AirPlayScreen());
     super.initState();
-    initPlatformState();
   }
 
   @override
@@ -305,12 +304,22 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
 
   _setNotN() async {
     await LocalStorage().set("tz101", 'no');
+    jpush.stopPush();
   }
 
   _setN() async {
     await LocalStorage().set("tz101", 'yes');
+    if (tsinit == 'no') {
+       jpush.clearAllNotifications();
+       jpush.resumePush();
+      initPlatformState();
+    }else{
+      tsinit = 'yes';
+       jpush.clearAllNotifications();
+       jpush.resumePush();
+      initPlatformState();
+    }
   }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);

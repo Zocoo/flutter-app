@@ -46,6 +46,7 @@ class _ChatListState extends State<ChatList> {
     }
     String url =
         Config().host + "/chat/chatTo?token=" + token + "&userId=" + _id;
+    print(url);
     final http.Response response = await http.get(url);
     Utf8Decoder utf8decoder = new Utf8Decoder();
     Map data = json.decode(utf8decoder.convert(response.bodyBytes));
