@@ -20,40 +20,47 @@ class Index extends StatefulWidget {
 }
 
 class IndexState extends State<Index> with WidgetsBindingObserver {
-
   String debugLable = 'Unknown';
   final JPush jpush = new JPush();
   String tsinit = "no";
-  Future<void> initPlatformState() async {
+  bool sd = false;
+  bool at = false;
+  bool be = false;
+
+  Future<void> initPlatformState(id) async {
     String platformVersion;
 
-    String id = await LocalStorage().get("userId");
-    print('-----------fff------------->>'+id);
+    print('-----------fff------------->>' + id);
     jpush.setAlias(id);
     // Platform messages may fail, so we use a try/catch PlatformException.
     jpush.getRegistrationID().then((rid) {
       setState(() {
         debugLable = "flutter getRegistrationID: $rid";
-        print('000000000000000000000>>>'+rid);
+        print('000000000000000000000>>>' + rid);
       });
     });
 
     jpush.setup(
       appKey: "ce53da8fe966805f893421bb",
       channel: "theChannel",
-      production: false,
-      debug: true,
+      production: true,
+      debug: false,
     );
-    jpush.applyPushAuthority(new NotificationSettingsIOS(
-        sound: true,
-        alert: true,
-        badge: true));
+    jpush.applyPushAuthority(
+        new NotificationSettingsIOS(sound: sd, alert: at, badge: be));
 
     try {
-
       jpush.addEventHandler(
         onReceiveNotification: (Map<String, dynamic> message) async {
           print("flutter onReceiveNotification: $message");
+          await LocalStorage().set("havaNewMsg", '1');
+          setState(() {
+            _msg = Icon(
+              Icons.speaker_notes,
+              color: Colors.redAccent,
+            );
+            _onNew = false;
+          });
           setState(() {
             debugLable = "flutter onReceiveNotification: $message";
           });
@@ -71,7 +78,6 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
           });
         },
       );
-
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -85,6 +91,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
       debugLable = platformVersion;
     });
   }
+
   final _bottomNavigationColor = Colors.blue;
   int _currentIndex = 0;
   List<Widget> list = List();
@@ -112,13 +119,14 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
 
   _idAndToken() async {
     _id = await LocalStorage().get("userId");
+    initPlatformState(_id);
     _token = await LocalStorage().get("token");
   }
 
   void _tgo() {
     _ct = Timer.periodic(new Duration(seconds: 6), (timer) {
       if (!_onNew) {
-        _chatNew();
+        if (!sd) _chatNew();
       }
     });
   }
@@ -143,7 +151,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
       final http.Response response = await http.get(url);
       Utf8Decoder utf8decoder = new Utf8Decoder();
       Map data = json.decode(utf8decoder.convert(response.bodyBytes));
-//    print(data);
+    print(data);
       var result = data['code'];
       if (result == 0) {
         await LocalStorage().set("havaNewMsg", '1');
@@ -304,22 +312,24 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
 
   _setNotN() async {
     await LocalStorage().set("tz101", 'no');
-    jpush.stopPush();
+    at = false;
+    be = false;
+    sd = false;
+    initPlatformState(_id + "000");
+//    jpush.setBadge(2);
   }
 
   _setN() async {
     await LocalStorage().set("tz101", 'yes');
     if (tsinit == 'no') {
-       jpush.clearAllNotifications();
-       jpush.resumePush();
-      initPlatformState();
-    }else{
-      tsinit = 'yes';
-       jpush.clearAllNotifications();
-       jpush.resumePush();
-      initPlatformState();
+      at = true;
+      be = true;
+      sd = true;
+      initPlatformState(_id);
+//      jpush.setBadge(1);
     }
   }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
