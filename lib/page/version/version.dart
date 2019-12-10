@@ -36,7 +36,7 @@ class _VersionState extends State<Version> with SingleTickerProviderStateMixin {
   }
   _ctXlGx() async {
     checkVersion();
-    _ctXl = Timer.periodic(new Duration(milliseconds: 3000), (timer) {
+    _ctXl = Timer.periodic(new Duration(milliseconds: 6000), (timer) {
       checkVersion();
     });
   }
@@ -190,6 +190,7 @@ class _VersionState extends State<Version> with SingleTickerProviderStateMixin {
 //      print(version);
       if (Config().version < result) {
         choiceUpdate(context);
+        _ctXl.cancel();
       } else {
         if (_a_status)
           Navigator.of(context).pushAndRemoveUntil(
