@@ -119,7 +119,7 @@ class IndexState extends State<Index> with WidgetsBindingObserver {
 
   _idAndToken() async {
     _id = await LocalStorage().get("userId");
-    initPlatformState(_id);
+//    initPlatformState(_id);
     _token = await LocalStorage().get("token");
   }
 
