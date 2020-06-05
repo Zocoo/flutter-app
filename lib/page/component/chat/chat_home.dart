@@ -1732,7 +1732,7 @@ class _ChatHomeState extends State<ChatHome> {
       'Filename': _startTime.toString() + ".m4a",
       'key': "m4a/" + _startTime.toString() + ".m4a",
       'policy': policy_base64,
-      'OSSAccessKeyId': "LTAIltvRb1U8UUiC",
+      'OSSAccessKeyId': "LTAIlAtvRDDADDb1U8UUiC",
       'success_action_status': '200', //让服务端返回200，不然，默认会返回204
       'signature': signature,
       'file': new UploadFileInfo(file, "imageFileName")
